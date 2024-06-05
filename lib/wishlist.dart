@@ -39,7 +39,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
 
             if (wishlistItems.isEmpty) {
               return Center(
-                child: Text('Your wishlist is empty'),
+                child: Text('Your wishlist is empty', style: Theme.of(context).textTheme.headline6),
               );
             }
 
@@ -58,12 +58,12 @@ class _WishlistScreenState extends State<WishlistScreen> {
                         SizedBox(height: 10),
                         Text(
                           item['name'],
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                          style: Theme.of(context).textTheme.headline6,
                         ),
                         SizedBox(height: 5),
                         Text(
                           '\$${item['price']}',
-                          style: TextStyle(fontSize: 18, color: Colors.green),
+                          style: Theme.of(context).textTheme.subtitle1?.copyWith(color: Colors.green),
                         ),
                         SizedBox(height: 10),
                         ElevatedButton(

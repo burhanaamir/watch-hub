@@ -119,7 +119,7 @@ class _StorePageState extends State<StorePage> {
                             width: 180,
                             height: 300,
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: Theme.of(context).cardColor,
                               borderRadius: BorderRadius.circular(8.0),
                               boxShadow: [
                                 BoxShadow(
@@ -147,21 +147,14 @@ class _StorePageState extends State<StorePage> {
                                   padding: const EdgeInsets.all(8.0),
                                   child: Text(
                                     productName,
-                                    style: TextStyle(
-                                      fontSize: 16.0,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                    style: Theme.of(context).textTheme.subtitle1,
                                   ),
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                                   child: Text(
                                     "\$$productPrice",
-                                    style: TextStyle(
-                                      fontSize: 16.0,
-                                      color: Colors.green,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                    style: Theme.of(context).textTheme.subtitle2?.copyWith(color: Colors.green, fontWeight: FontWeight.bold),
                                   ),
                                 ),
                                 Padding(
@@ -185,7 +178,7 @@ class _StorePageState extends State<StorePage> {
                                             content: Text('Added to wishlist'),
                                           ));
                                         },
-                                        child: Text('ADD TO WISHLIST'),
+                                        child: Text('Wishlist'),
                                         style: ElevatedButton.styleFrom(
                                           primary: Colors.orange,
                                           textStyle: TextStyle(fontSize: 16.0),
@@ -211,7 +204,7 @@ class _StorePageState extends State<StorePage> {
                                             content: Text('Added to cart'),
                                           ));
                                         },
-                                        child: Text('ADD TO CART'),
+                                        child: Text('Add to Cart'),
                                         style: ElevatedButton.styleFrom(
                                           primary: Colors.blue,
                                           textStyle: TextStyle(fontSize: 16.0),

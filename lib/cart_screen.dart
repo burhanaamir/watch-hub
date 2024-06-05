@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'CheckoutPage.dart';
 
-
 class CartScreen extends StatefulWidget {
   @override
   _CartScreenState createState() => _CartScreenState();
@@ -39,7 +38,7 @@ class _CartScreenState extends State<CartScreen> {
 
             if (cartItems.isEmpty) {
               return Center(
-                child: Text('Your cart is empty'),
+                child: Text('Your cart is empty', style: Theme.of(context).textTheme.headline6),
               );
             }
 
@@ -61,12 +60,12 @@ class _CartScreenState extends State<CartScreen> {
                               SizedBox(height: 10),
                               Text(
                                 item['name'],
-                                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                                style: Theme.of(context).textTheme.headline6,
                               ),
                               SizedBox(height: 5),
                               Text(
                                 '\$${item['price']}',
-                                style: TextStyle(fontSize: 18, color: Colors.green),
+                                style: Theme.of(context).textTheme.subtitle1?.copyWith(color: Colors.green),
                               ),
                               SizedBox(height: 10),
                               ElevatedButton(
