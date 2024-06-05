@@ -1,12 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
-import 'package:watch_hub1/home_screen.dart';
 import 'package:watch_hub1/login_screen.dart';
-import 'auth_service.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:io';
 
 class SignUpScreen extends StatefulWidget {
@@ -25,26 +24,48 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   File? _image;
+  Uint8List? webImage;
 
   Future<void> _pickImage() async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
-    setState(() {
+    if(kIsWeb){
+      final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+
       if (pickedFile != null) {
-        _image = File(pickedFile.path);
+        var convertedFile = await pickedFile.readAsBytes();
+
+        setState(() {
+          webImage = convertedFile;
+        });
       }
-    });
+
+    }
+    else{
+      final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+      setState(() {
+        if (pickedFile != null) {
+          _image = File(pickedFile.path);
+        }
+      });
+    }
   }
 
-  void signUpWithImage()async{
+  void signUpWithImage(BuildContext context)async{
     String userID = Uuid().v1();
 
-    UploadTask uploadTask = FirebaseStorage.instance.ref().child("UserImage").child(userID).putFile(_image!);
-    TaskSnapshot taskSnapshot = await uploadTask;
-    String imageUrl = await taskSnapshot.ref.getDownloadURL();
-    _signUp(userID, imageUrl);
+    if(kIsWeb){
+      UploadTask uploadTask = FirebaseStorage.instance.ref().child("UserImage").child(userID).putData(webImage!);
+      TaskSnapshot taskSnapshot = await uploadTask;
+      String imageUrl = await taskSnapshot.ref.getDownloadURL();
+      _signUp(userID, imageUrl,context);
+    }
+    else{
+      UploadTask uploadTask = FirebaseStorage.instance.ref().child("UserImage").child(userID).putFile(_image!);
+      TaskSnapshot taskSnapshot = await uploadTask;
+      String imageUrl = await taskSnapshot.ref.getDownloadURL();
+      _signUp(userID, imageUrl,context);
+    }
   }
-
-  void _signUp(String userID, String imageUrl) async {
+  void _signUp(String userID, String imageUrl,BuildContext context) async {
 
 
     if (_passwordController.text != _confirmPasswordController.text) {
@@ -86,7 +107,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blue[50],
+      backgroundColor: Colors.white,
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
@@ -94,11 +115,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               GestureDetector(
-                onTap: _pickImage,
+                onTap: (){
+                  _pickImage();
+                },
                 child: CircleAvatar(
                   radius: 50,
-                  backgroundImage: _image != null ? FileImage(_image!) : null, // Replace with your logo
-                  child: _image == null ? Icon(Icons.add_a_photo) : null,
+                  backgroundImage: webImage != null ? MemoryImage(webImage!) : null, // Replace with your logo
+                  child: webImage == null ? Icon(Icons.add_a_photo) : null,
                 ),
               ),
               SizedBox(height: 20),
@@ -171,7 +194,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: (){
-                  signUpWithImage();
+                  signUpWithImage(context);
                 },
                 style: ElevatedButton.styleFrom(
                   padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),

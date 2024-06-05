@@ -1,7 +1,11 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:js' as js;
 
-class AuthService {
+bool get rendererCanvasKit {
+  var r = js.context['flutterCanvasKit'];
+  return r != null;
+}class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   Future<User?> signInWithEmailPassword(String email, String password) async {

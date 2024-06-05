@@ -1,8 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:watch_hub1/home_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:watch_hub1/main.dart';
 import 'package:watch_hub1/signup_screen.dart';
-import 'auth_service.dart';
+
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -12,29 +13,36 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final AuthService _authService = AuthService();
 
-  void _login() async {
-    var user = await _authService.signInWithEmailPassword(
-      _emailController.text,
-      _passwordController.text,
-    );
-    Navigator.push(context, MaterialPageRoute(builder: (context) => btom(),));
+  void login() async {
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
 
-    if (user != null) {
-      // Navigator.push(context, MaterialPageRoute(builder: (context) => MyApp(),));
+    if (email == "admin" && password == "123456") {
+      SharedPreferences userCred = await SharedPreferences.getInstance();
+      userCred.setString("email", email);
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => adminBtom()));
     } else {
-      // Handle login failure
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to sign in. Please try again.')),
-      );
+      try {
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+        SharedPreferences userCred = await SharedPreferences.getInstance();
+        userCred.setString("email", email);
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => btom()));
+      } on FirebaseAuthException catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.code.toString())),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blue[50],
+      backgroundColor: Colors.white,
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -42,8 +50,10 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               CircleAvatar(
-                radius: 50,
-                backgroundImage: AssetImage('assets/logo.png'), // Replace with your logo
+                radius: 50.0,
+                backgroundImage:
+                NetworkImage('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4Sdk-LWMWvsPWGGEmi81CogxN8e3aEllFbA&s'),
+                backgroundColor: Colors.transparent,
               ),
               SizedBox(height: 20),
               TextField(
@@ -66,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               SizedBox(height: 20),
               ElevatedButton(
-                onPressed: _login,
+                onPressed: login,
                 style: ElevatedButton.styleFrom(
                   padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                 ),
@@ -74,7 +84,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               TextButton(
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => SignUpScreen(),));
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => SignUpScreen()));
                 },
                 child: Text('Don\'t have an account? Sign Up'),
               ),
