@@ -89,13 +89,7 @@ class _StorePageState extends State<StorePage> {
 
                   return Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: GridView.builder(
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 8.0,
-                        mainAxisSpacing: 8.0,
-                        childAspectRatio: 180 / 380,
-                      ),
+                    child: ListView.builder(
                       itemCount: dataLength,
                       itemBuilder: (context, index) {
                         String productImage = data[index]["image"];
@@ -117,7 +111,8 @@ class _StorePageState extends State<StorePage> {
                           },
                           child: Container(
                             width: 180,
-                            height: 300,
+                            height: 386,
+                            margin: const EdgeInsets.symmetric(vertical: 10.0),
                             decoration: BoxDecoration(
                               color: Theme.of(context).cardColor,
                               borderRadius: BorderRadius.circular(8.0),

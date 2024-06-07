@@ -91,10 +91,48 @@ class _HomeScreenState extends State<HomeScreen> {
                     itemBuilder: (context, index) {
                       var product = snapshot.data!.docs[index];
                       return ProductContainer(
-                        productImage: product['image'],
-                        productName: product['name'],
-                        productPrice: "\$${product['price']}",
-                        productID: product['id'],
+                        productImage: product['image'] ?? 'https://via.placeholder.com/150',
+                        productName: product['name'] ?? 'No Name',
+                        productPrice: "\$${product['price'] ?? '0.00'}",
+                        productID: product['id'] ?? '',
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 20),
+            Container(
+              margin: EdgeInsets.only(left: 14, top: 14),
+              child: Text(
+                "Latest Reviews",
+                style: Theme.of(context).textTheme.headline6,
+              ),
+            ),
+            const SizedBox(height: 20),
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance.collection('reviews').orderBy('timestamp', descending: true).limit(5).snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                }
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return Center(child: Text('No reviews available'));
+                }
+                return Container(
+                  height: 180,
+                  child: ListView.builder(
+                    itemCount: snapshot.data!.docs.length,
+                    shrinkWrap: true,
+                    scrollDirection: Axis.horizontal,
+                    physics: const ScrollPhysics(),
+                    itemBuilder: (context, index) {
+                      var review = snapshot.data!.docs[index];
+                      return ReviewContainer(
+                        profileImage: review['profileImage'] ?? 'https://via.placeholder.com/150',
+                        userName: review['userName'] ?? 'Anonymous',
+                        rating: review['rating']?.toDouble() ?? 0.0,
+                        reviewText: review['review'] ?? '',
                       );
                     },
                   ),
@@ -164,6 +202,65 @@ class ProductContainer extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class ReviewContainer extends StatelessWidget {
+  const ReviewContainer({
+    super.key,
+    required this.profileImage,
+    required this.userName,
+    required this.rating,
+    required this.reviewText,
+  });
+
+  final String profileImage;
+  final String userName;
+  final double rating;
+  final String reviewText;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 250,
+      margin: const EdgeInsets.symmetric(horizontal: 10),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                backgroundImage: NetworkImage(profileImage),
+              ),
+              SizedBox(width: 10),
+              Text(
+                userName,
+                style: Theme.of(context).textTheme.bodyText1,
+              ),
+            ],
+          ),
+          SizedBox(height: 10),
+          Row(
+            children: List.generate(5, (index) {
+              return Icon(
+                index < rating ? Icons.star : Icons.star_border,
+                color: Colors.amber,
+              );
+            }),
+          ),
+          SizedBox(height: 10),
+          Text(
+            reviewText,
+            style: Theme.of(context).textTheme.bodyText2,
+          ),
+        ],
       ),
     );
   }

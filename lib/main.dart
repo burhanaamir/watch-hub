@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:watch_hub1/Product_add.dart';
@@ -63,23 +65,26 @@ class _btomState extends State<btom> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: myScreens[currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.grey,
-        showUnselectedLabels: true,
-        showSelectedLabels: true,
-        currentIndex: currentIndex,
-        onTap: pageShifter,
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: "Cart"),
-          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: "Wislist"),
-          BottomNavigationBarItem(icon: Icon(Icons.store), label: "Store"),
-
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
-        ],
+    return PopScope(
+       onPopInvoked: (didPop) => exit(0),
+      child: Scaffold(
+        body: myScreens[currentIndex],
+        bottomNavigationBar: BottomNavigationBar(
+          selectedItemColor: Colors.black,
+          unselectedItemColor: Colors.grey,
+          showUnselectedLabels: true,
+          showSelectedLabels: true,
+          currentIndex: currentIndex,
+          onTap: pageShifter,
+          items: [
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+            BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: "Cart"),
+            BottomNavigationBarItem(icon: Icon(Icons.favorite), label: "Wislist"),
+            BottomNavigationBarItem(icon: Icon(Icons.store), label: "Store"),
+      
+            BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
+          ],
+        ),
       ),
     );
   }

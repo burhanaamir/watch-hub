@@ -25,48 +25,37 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   File? _image;
   Uint8List? webImage;
+  bool _isLoading = false;
 
   Future<void> _pickImage() async {
-    if(kIsWeb){
-      final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
-
-      if (pickedFile != null) {
-        var convertedFile = await pickedFile.readAsBytes();
-
-        setState(() {
-          webImage = convertedFile;
-        });
-      }
-
-    }
-    else{
-      final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (kIsWeb && pickedFile != null) {
+      var convertedFile = await pickedFile.readAsBytes();
       setState(() {
-        if (pickedFile != null) {
-          _image = File(pickedFile.path);
-        }
+        webImage = convertedFile;
+        _image = null; // Ensure the file-based image is null
+      });
+    } else if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+        webImage = null; // Ensure the web-based image is null
       });
     }
   }
 
-  void signUpWithImage(BuildContext context)async{
-    String userID = Uuid().v1();
-
-    if(kIsWeb){
-      UploadTask uploadTask = FirebaseStorage.instance.ref().child("UserImage").child(userID).putData(webImage!);
-      TaskSnapshot taskSnapshot = await uploadTask;
-      String imageUrl = await taskSnapshot.ref.getDownloadURL();
-      _signUp(userID, imageUrl,context);
+  void signUpWithImage(BuildContext context) async {
+    if (_emailController.text.isEmpty ||
+        _passwordController.text.isEmpty ||
+        _confirmPasswordController.text.isEmpty ||
+        _nameController.text.isEmpty ||
+        _genderController.text.isEmpty ||
+        _ageController.text.isEmpty ||
+        _locationController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('All fields are required.')),
+      );
+      return;
     }
-    else{
-      UploadTask uploadTask = FirebaseStorage.instance.ref().child("UserImage").child(userID).putFile(_image!);
-      TaskSnapshot taskSnapshot = await uploadTask;
-      String imageUrl = await taskSnapshot.ref.getDownloadURL();
-      _signUp(userID, imageUrl,context);
-    }
-  }
-  void _signUp(String userID, String imageUrl,BuildContext context) async {
-
 
     if (_passwordController.text != _confirmPasswordController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -75,33 +64,47 @@ class _SignUpScreenState extends State<SignUpScreen> {
       return;
     }
 
-    else{
-     try{
-       await FirebaseAuth.instance.createUserWithEmailAndPassword(
-         email : _emailController.text,
-         password: _passwordController.text,
-       );
+    setState(() {
+      _isLoading = true;
+    });
 
-       await _firestore.collection('users').doc(userID).set({
-         'name': _nameController.text,
-         'gender': _genderController.text,
-         'age': _ageController.text,
-         'location': _locationController.text,
-         'email': _emailController.text,
-         'image': imageUrl,
-       });
-       Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen(),));
-     }
-     on FirebaseAuthException catch(e){
-       ScaffoldMessenger.of(context).showSnackBar(
-         SnackBar(content: Text(e.code.toString())),
-       );
-     }
+    try {
+      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: _emailController.text,
+        password: _passwordController.text,
+      );
+      String uid = userCredential.user!.uid;
 
+      String imageUrl = "";
+      if (webImage != null) {
+        UploadTask uploadTask = FirebaseStorage.instance.ref().child("UserImage").child(uid).putData(webImage!);
+        TaskSnapshot taskSnapshot = await uploadTask;
+        imageUrl = await taskSnapshot.ref.getDownloadURL();
+      } else if (_image != null) {
+        UploadTask uploadTask = FirebaseStorage.instance.ref().child("UserImage").child(uid).putFile(_image!);
+        TaskSnapshot taskSnapshot = await uploadTask;
+        imageUrl = await taskSnapshot.ref.getDownloadURL();
+      }
 
+      await _firestore.collection('users').doc(uid).set({
+        'name': _nameController.text,
+        'gender': _genderController.text,
+        'age': _ageController.text,
+        'location': _locationController.text,
+        'email': _emailController.text,
+        'image': imageUrl,
+      });
+
+      Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()));
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message!)),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
-
-
   }
 
   @override
@@ -115,13 +118,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               GestureDetector(
-                onTap: (){
-                  _pickImage();
-                },
+                onTap: _pickImage,
                 child: CircleAvatar(
                   radius: 50,
-                  backgroundImage: webImage != null ? MemoryImage(webImage!) : null, // Replace with your logo
-                  child: webImage == null ? Icon(Icons.add_a_photo) : null,
+                  backgroundImage: webImage != null
+                      ? MemoryImage(webImage!) as ImageProvider
+                      : (_image != null
+                      ? FileImage(_image!)
+                      : null),
+                  child: webImage == null && _image == null
+                      ? Icon(Icons.add_a_photo)
+                      : null,
                 ),
               ),
               SizedBox(height: 20),
@@ -192,8 +199,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 obscureText: true,
               ),
               SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: (){
+              _isLoading
+                  ? CircularProgressIndicator()
+                  : ElevatedButton(
+                onPressed: () {
                   signUpWithImage(context);
                 },
                 style: ElevatedButton.styleFrom(
@@ -203,7 +212,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
               TextButton(
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen(),));
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()));
                 },
                 child: Text('Already have an account? Login'),
               ),

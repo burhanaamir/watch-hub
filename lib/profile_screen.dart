@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:watch_hub1/login_screen.dart';
 import 'Change Password Page.dart';
 import 'order_history_page.dart';
 import 'Feedback Page.dart';
+import 'review.dart';
+import 'Edit User.dart';
+// Import the new Review and Rating Page
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -36,72 +40,110 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-        child: Column(
-          children: [
-            SizedBox(height: 20),
-            CircleAvatar(
-              radius: 50,
-              backgroundImage: NetworkImage(
-                  user?.photoURL ?? 'https://via.placeholder.com/150'),
-            ),
-            SizedBox(height: 20),
-            Text(
-              user?.displayName ?? 'No Name',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            Text(
-              user?.email ?? 'No Email',
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 20),
-            _buildProfileOption(
-              context,
-              title: 'Order History',
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => OrderHistoryPage(),
-                  ),
-                );
-              },
-            ),
-            _buildProfileOption(
-              context,
-              title: 'Change Password',
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ChangePasswordPage(),
-                  ),
-                );
-              },
-            ),
-            _buildProfileOption(
-              context,
-              title: 'Feedback',
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => FeedbackPage(),
-                  ),
-                );
-              },
-            ),
-            _buildProfileOption(
-              context,
-              title: 'Sign Out',
-              onTap: () async {
-                await _auth.signOut();
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        ),
-      ),
+          : StreamBuilder(
+          stream: FirebaseFirestore.instance.collection("users").where("email",isEqualTo: user?.email).snapshots(),
+          builder: (BuildContext context, snapshot) {
+            if (snapshot.hasData) {
+
+              var dataLength = snapshot.data!.docs.length;
+
+              return ListView.builder(
+                itemCount: dataLength,
+                itemBuilder: (context, index) {
+                  return Column(
+                    children: [
+                      SizedBox(height: 20),
+                      CircleAvatar(
+                        radius: 50,
+                        backgroundImage: NetworkImage("${snapshot.data!.docs[index]["image"]}"),
+                      ),
+                      SizedBox(height: 20),
+                      Text(
+                        "${snapshot.data!.docs[index]["name"]}",
+                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        "${snapshot.data!.docs[index]["email"]}",
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      SizedBox(height: 20),
+                      _buildProfileOption(
+                        context,
+                        title: 'Order History',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => OrderHistoryPage(),
+                            ),
+                          );
+                        },
+                      ),
+                      _buildProfileOption(
+                        context,
+                        title: 'Edit Profile',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EditProfileScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      _buildProfileOption(
+                        context,
+                        title: 'Change Password',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ChangePasswordPage(),
+                            ),
+                          );
+                        },
+                      ),
+                      _buildProfileOption(
+                        context,
+                        title: 'Feedback',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => FeedbackPage(),
+                            ),
+                          );
+                        },
+                      ),
+                      _buildProfileOption(
+                        context,
+                        title: 'Review and Rating',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ReviewRatingPage(),
+                            ),
+                          );
+                        },
+                      ),
+                      _buildProfileOption(
+                        context,
+                        title: 'Sign Out',
+                        onTap: () async {
+                          await FirebaseAuth.instance.signOut();
+                          Navigator.of(context).push(MaterialPageRoute(builder: (context) => LoginScreen(),));
+                        },
+                      ),
+                    ],
+                  );
+                },);
+            } else if (snapshot.hasError) {
+              return Icon(Icons.error_outline);
+            } else {
+              return CircularProgressIndicator();
+            }
+          }),
     );
   }
 
