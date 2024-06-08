@@ -54,9 +54,9 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 CircleAvatar(
-                  radius: 50.0,
+                  radius: 60.0,
                   backgroundImage:
-                  NetworkImage('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4Sdk-LWMWvsPWGGEmi81CogxN8e3aEllFbA&s'),
+                  NetworkImage('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ5d5RGlV8lAzTiOU6JGPMdBdk6QxVjotQPig&s'),
                   backgroundColor: Colors.transparent,
                 ),
                 SizedBox(height: 20),

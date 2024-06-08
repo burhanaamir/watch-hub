@@ -50,9 +50,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
         _nameController.text.isEmpty ||
         _genderController.text.isEmpty ||
         _ageController.text.isEmpty ||
-        _locationController.text.isEmpty) {
+        _locationController.text.isEmpty ||
+        (webImage == null && _image == null)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('All fields are required.')),
+        SnackBar(content: Text('All fields including the image are required.')),
       );
       return;
     }

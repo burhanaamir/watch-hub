@@ -1,6 +1,6 @@
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 import 'product_detail.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -44,9 +44,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 autoPlay: true,
               ),
               items: [
-                'https://via.placeholder.com/600/92c952',
-                'https://via.placeholder.com/600/771796',
-                'https://via.placeholder.com/600/24f355',
+                'https://cdn.shopify.com/s/files/1/0278/9723/3501/files/Stowa-Klassik-40-2_9f84f8b7-a57f-4cf6-814a-22d2bdef528e.jpg?v=1698940282',
+                'https://www.chapelle.co.uk/Images/Components/TwoColumn/Chapelle%20Gents%20Watches%20700x500_2023299-143139.jpg',
+                'https://wwd.com/wp-content/uploads/2023/10/best-watches-for-men.png?w=911&h=510&crop=1'
+
+
+                // Add more valid image URLs here
               ].map((i) {
                 return Builder(
                   builder: (BuildContext context) {
@@ -56,7 +59,23 @@ class _HomeScreenState extends State<HomeScreen> {
                       decoration: BoxDecoration(
                         color: Theme.of(context).primaryColor,
                       ),
-                      child: Image.network(i, fit: BoxFit.cover),
+                      child: Image.network(
+                        i,
+                        fit: BoxFit.cover,
+                        loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                          if (loadingProgress == null) {
+                            return child;
+                          }
+                          return Center(
+                            child: CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
+                                  : null,
+                            ),
+                          );
+                        },
+                        errorBuilder: (context, error, stackTrace) => Icon(Icons.error),
+                      ),
                     );
                   },
                 );
