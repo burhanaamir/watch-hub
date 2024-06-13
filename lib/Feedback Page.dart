@@ -22,7 +22,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Feedback submitted successfully')),
+        SnackBar(content: Text('Message submitted successfully')),
       );
 
       _feedbackController.clear();
@@ -33,7 +33,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Feedback'),
+        title: Text('Customer support'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -43,14 +43,14 @@ class _FeedbackPageState extends State<FeedbackPage> {
               controller: _feedbackController,
               maxLines: 6,
               decoration: InputDecoration(
-                labelText: 'Your Feedback',
+                labelText: 'Your Message',
                 border: OutlineInputBorder(),
               ),
             ),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: _submitFeedback,
-              child: Text('Submit Feedback'),
+              child: Text('Submit'),
               style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
               ),

@@ -78,7 +78,7 @@ class _ProductaddState extends State<Productadd> {
     await _firestore.collection('product').doc(userID).set({
       "id" : userID,
       'name': _pnameController.text,
-      'price': _ppriceController.text,
+      'price': _ppriceController,
       'sdes': _psdescriptionController.text,
       'ldes': _pldescriptionController.text,
       'Color': _colorController.text,

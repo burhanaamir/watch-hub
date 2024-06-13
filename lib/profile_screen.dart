@@ -105,7 +105,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                       _buildProfileOption(
                         context,
-                        title: 'Feedback',
+                        title: 'Customer support',
                         onTap: () {
                           Navigator.push(
                             context,

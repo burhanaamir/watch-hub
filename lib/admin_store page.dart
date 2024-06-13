@@ -59,22 +59,14 @@ class _AStorePageState extends State<AStorePage> {
                       itemBuilder: (context, index) {
                         String productImage = data[index]["image"];
                         String productName = data[index]["name"];
-                        String productPrice = data[index]["price"];
+                        String productPrice = data[index]["price"].toString();
                         String productID = data[index]["id"];
                         String productL = data[index]["ldes"];
                         String productS = data[index]["sdes"];
                         String productColor = data[index]["Color"];
 
-                        return GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ProductDetailPage(productID: productID),
-                              ),
-                            );
-                          },
-                          child: Container(
+                        return
+                           Container(
                             width: 180,
                             height: 300,
                             decoration: BoxDecoration(
@@ -152,8 +144,7 @@ class _AStorePageState extends State<AStorePage> {
                                 ),
                               ],
                             ),
-                          ),
-                        );
+                          );
                       },
                     ),
                   );

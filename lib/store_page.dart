@@ -13,6 +13,8 @@ class _StorePageState extends State<StorePage> {
   String uEmail = "";
   String searchQuery = "";
   String sortOption = "None";
+  int _quantity = 1; // Default quantity
+
 
   Future getCred() async {
     SharedPreferences userCred = await SharedPreferences.getInstance();
@@ -29,10 +31,24 @@ class _StorePageState extends State<StorePage> {
 
   void sortProducts(List<DocumentSnapshot> products) {
     if (sortOption == "Price: Low to High") {
-      products.sort((a, b) => double.parse(a['price']).compareTo(double.parse(b['price'])));
+      products.sort((a, b) => int.parse(a['price'].toString()).compareTo(int.parse(b['price'].toString())));
     } else if (sortOption == "Price: High to Low") {
-      products.sort((a, b) => double.parse(b['price']).compareTo(double.parse(a['price'])));
+      products.sort((a, b) => int.parse(b['price'].toString()).compareTo(int.parse(a['price'].toString())));
     }
+  }
+
+  void _increaseQuantity() {
+    setState(() {
+      _quantity++;
+    });
+  }
+
+  void _decreaseQuantity() {
+    setState(() {
+      if (_quantity > 1) {
+        _quantity--;
+      }
+    });
   }
 
   @override
@@ -94,7 +110,7 @@ class _StorePageState extends State<StorePage> {
                       itemBuilder: (context, index) {
                         String productImage = data[index]["image"];
                         String productName = data[index]["name"];
-                        String productPrice = data[index]["price"];
+                        int productPrice = int.parse(data[index]["price"].toString()); // Convert price to integer
                         String productID = data[index]["id"];
                         String productL = data[index]["ldes"];
                         String productS = data[index]["sdes"];
@@ -152,6 +168,23 @@ class _StorePageState extends State<StorePage> {
                                     style: Theme.of(context).textTheme.subtitle2?.copyWith(color: Colors.green, fontWeight: FontWeight.bold),
                                   ),
                                 ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    IconButton(
+                                      icon: Icon(Icons.remove),
+                                      onPressed: _decreaseQuantity,
+                                    ),
+                                    Text(
+                                      '$_quantity',
+                                      style: Theme.of(context).textTheme.headline6,
+                                    ),
+                                    IconButton(
+                                      icon: Icon(Icons.add),
+                                      onPressed: _increaseQuantity,
+                                    ),
+                                  ],
+                                ),
                                 Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: Column(
@@ -163,7 +196,7 @@ class _StorePageState extends State<StorePage> {
                                             "id": wishlistID,
                                             "email": uEmail,
                                             'name': productName,
-                                            'price': productPrice,
+                                            'price': productPrice, // Store price as integer
                                             'sdes': productS,
                                             'ldes': productL,
                                             'Color': productColor,
@@ -189,8 +222,9 @@ class _StorePageState extends State<StorePage> {
                                             "id": cartID,
                                             "email": uEmail,
                                             'name': productName,
-                                            'price': productPrice,
+                                            'price': productPrice, // Store price as integer
                                             'sdes': productS,
+                                            'quantity': _quantity, // Quantity added to cart
                                             'ldes': productL,
                                             'Color': productColor,
                                             'image': productImage,

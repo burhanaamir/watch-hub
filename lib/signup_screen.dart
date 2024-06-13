@@ -18,7 +18,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _genderController = TextEditingController();
   final TextEditingController _ageController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -26,6 +25,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   File? _image;
   Uint8List? webImage;
   bool _isLoading = false;
+  String _selectedGender = 'Male';
 
   Future<void> _pickImage() async {
     final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
@@ -48,7 +48,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
         _passwordController.text.isEmpty ||
         _confirmPasswordController.text.isEmpty ||
         _nameController.text.isEmpty ||
-        _genderController.text.isEmpty ||
         _ageController.text.isEmpty ||
         _locationController.text.isEmpty ||
         (webImage == null && _image == null)) {
@@ -89,7 +88,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
       await _firestore.collection('users').doc(uid).set({
         'name': _nameController.text,
-        'gender': _genderController.text,
+        'gender': _selectedGender,
         'age': _ageController.text,
         'location': _locationController.text,
         'email': _emailController.text,
@@ -142,13 +141,24 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
               ),
               SizedBox(height: 20),
-              TextField(
-                controller: _genderController,
+              DropdownButtonFormField<String>(
+                value: _selectedGender,
                 decoration: InputDecoration(
                   labelText: 'Gender',
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.person_outline),
                 ),
+                items: ['Male', 'Female'].map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _selectedGender = newValue!;
+                  });
+                },
               ),
               SizedBox(height: 20),
               TextField(

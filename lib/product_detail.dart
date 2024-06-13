@@ -14,6 +14,7 @@ class ProductDetailPage extends StatefulWidget {
 
 class _ProductDetailPageState extends State<ProductDetailPage> {
   String uEmail = "";
+  int _quantity = 1; // Default quantity
 
   Future getCred() async {
     SharedPreferences userCred = await SharedPreferences.getInstance();
@@ -26,6 +27,20 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   void initState() {
     super.initState();
     getCred();
+  }
+
+  void _increaseQuantity() {
+    setState(() {
+      _quantity++;
+    });
+  }
+
+  void _decreaseQuantity() {
+    setState(() {
+      if (_quantity > 1) {
+        _quantity--;
+      }
+    });
   }
 
   @override
@@ -43,7 +58,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             String pName = data["name"];
             String pShortDesc = data["sdes"];
             String pLongDesc = data["ldes"];
-            String pPrice = data["price"];
+            // Ensure price is converted to integer
+            int pPrice = int.parse(data["price"].toString()); // Convert price to integer
             String pID = data["id"];
             String pImage = data["image"];
             String pColor = data["Color"];
@@ -82,7 +98,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                               ),
                               SizedBox(height: 8.0),
                               Text(
-                                '\$$pPrice',
+                                '\$$pPrice', // Display price
                                 style: Theme.of(context).textTheme.headline6?.copyWith(color: Colors.green),
                               ),
                             ],
@@ -103,6 +119,24 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       ),
                     ),
                     SizedBox(height: 16.0),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.remove),
+                          onPressed: _decreaseQuantity,
+                        ),
+                        Text(
+                          '$_quantity',
+                          style: Theme.of(context).textTheme.headline6,
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.add),
+                          onPressed: _increaseQuantity,
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16.0),
                     ElevatedButton(
                       onPressed: () async {
                         String wishlistID = Uuid().v1();
@@ -110,7 +144,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           "id": wishlistID,
                           "email": uEmail,
                           'name': pName,
-                          'price': pPrice,
+                          'price': pPrice, // Price stored as integer
+                          'quantity': _quantity, // Quantity added to wishlist
                           'sdes': pShortDesc,
                           'ldes': pLongDesc,
                           'Color': pColor,
@@ -134,7 +169,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           "id": cartID,
                           "email": uEmail,
                           'name': pName,
-                          'price': pPrice,
+                          'price': pPrice, // Price stored as integer
+                          'quantity': _quantity, // Quantity added to cart
                           'sdes': pShortDesc,
                           'ldes': pLongDesc,
                           'Color': pColor,

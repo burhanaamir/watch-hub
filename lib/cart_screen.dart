@@ -42,6 +42,12 @@ class _CartScreenState extends State<CartScreen> {
               );
             }
 
+            // Calculate total price
+            int totalPrice = 0;
+            cartItems.forEach((doc) {
+              totalPrice += doc['price'] as int;  // Ensure the price is treated as double
+            });
+
             return Column(
               children: [
                 Expanded(
@@ -68,17 +74,27 @@ class _CartScreenState extends State<CartScreen> {
                                 style: Theme.of(context).textTheme.subtitle1?.copyWith(color: Colors.green),
                               ),
                               SizedBox(height: 10),
-                              ElevatedButton(
-                                onPressed: () async {
-                                  await FirebaseFirestore.instance.collection('Cart').doc(item.id).delete();
-                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                    content: Text('${item['name']} removed from cart'),
-                                  ));
-                                },
-                                child: Text('Remove from Cart'),
-                                style: ElevatedButton.styleFrom(
-                                  primary: Colors.red,
-                                  onPrimary: Colors.white,
+                              Container(
+                                margin: EdgeInsets.symmetric(horizontal: 10),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: () async {
+                                        await FirebaseFirestore.instance.collection('Cart').doc(item.id).delete();
+                                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                          content: Text('${item['name']} removed from cart'),
+                                        ));
+                                      },
+                                      child: Text('Remove from Cart'),
+                                      style: ElevatedButton.styleFrom(
+                                        primary: Colors.red,
+                                        onPrimary: Colors.white,
+                                      ),
+                                    ),
+                                    
+                                    Text("${item['quantity']}")
+                                  ],
                                 ),
                               ),
                             ],
@@ -87,6 +103,10 @@ class _CartScreenState extends State<CartScreen> {
                       );
                     },
                   ),
+                ),
+                Text(
+                  'Total Price: \$${totalPrice.toStringAsFixed(2)}',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),

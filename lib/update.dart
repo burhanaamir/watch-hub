@@ -81,9 +81,11 @@ class _ProductupdateState extends State<Productupdate> {
   }
 
   void Productdata({required String image}) async {
+    double price = double.tryParse(_ppriceController.text) ?? 0;  // Convert the price to a double
+
     await FirebaseFirestore.instance.collection("product").doc(widget.ID).update({
       'name': _pnameController.text,
-      'price': _ppriceController.text,
+      'price': price,  // Save price as a number
       'sdes': _psdescriptionController.text,
       'ldes': _pldescriptionController.text,
       'Color': _colorController.text,

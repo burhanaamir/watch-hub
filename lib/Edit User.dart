@@ -15,7 +15,6 @@ class EditProfileScreen extends StatefulWidget {
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _genderController = TextEditingController();
   final TextEditingController _ageController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -26,6 +25,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   String? imageUrl;
   User? user;
   bool _isLoading = true;
+  String _selectedGender = 'Male';
 
   @override
   void initState() {
@@ -47,7 +47,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
       setState(() {
         _nameController.text = userDoc['name'] ?? '';
-        _genderController.text = userDoc['gender'] ?? '';
+        _selectedGender = userDoc['gender'] ?? 'Male';
         _ageController.text = userDoc['age'] ?? '';
         _locationController.text = userDoc['location'] ?? '';
         imageUrl = userDoc['image'] ?? '';
@@ -110,7 +110,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     try {
       await FirebaseFirestore.instance.collection("users").doc(user!.uid).update({
         'name': _nameController.text,
-        'gender': _genderController.text,
+        'gender': _selectedGender,
         'age': _ageController.text,
         'location': _locationController.text,
         'image': imageUrl,
@@ -126,7 +126,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blue[50],
+      backgroundColor: Colors.white,
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
           : Center(
@@ -155,13 +155,24 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ),
               ),
               SizedBox(height: 20),
-              TextField(
-                controller: _genderController,
+              DropdownButtonFormField<String>(
+                value: _selectedGender,
                 decoration: InputDecoration(
                   labelText: 'Gender',
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.person_outline),
                 ),
+                items: ['Male', 'Female'].map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _selectedGender = newValue!;
+                  });
+                },
               ),
               SizedBox(height: 20),
               TextField(
